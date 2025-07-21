@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>シフト管理アプリ</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .form-section {
+            background: #f8f9ff;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border: 2px solid #e3e8ff;
+        }
+
+        .form-section h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-delete {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            padding: 8px 15px;
+            font-size: 14px;
+        }
+
+        .shifts-section {
+            background: #fff;
+            border-radius: 15px;
+            border: 2px solid #e3e8ff;
+        }
+
+        .shifts-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 25px;
+            border-radius: 13px 13px 0 0;
+        }
+
+        .shifts-list {
+            padding: 25px;
+        }
+
+        .shift-item {
+            background: #f8f9ff;
+            border: 2px solid #e3e8ff;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .shift-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+
+        .shift-info {
+            flex: 1;
+        }
+
+        .shift-date {
+            font-weight: 700;
+            color: #667eea;
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+        }
+
+        .shift-details {
+            color: #666;
+            font-size: 0.95rem;
+        }
+
+        .no-shifts {
+            text-align: center;
+            color: #999;
+            font-style: italic;
+            padding: 40px;
+        }
+
+        .week-summary {
+            background: linear-gradient(135deg, #00b4db 0%, #0083b0 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .summary-stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 15px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+            
+            .header {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .shift-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .summary-stats {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📅 シフト管理アプリ</h1>
+            <p>アルバイトのシフトを簡単に管理しよう</p>
+        </div>
+        
+        <div class="content">
+            <div class="week-summary" id="weekSummary">
+                <h3>今週のサマリー</h3>
+                <div class="summary-stats">
+                    <div class="stat-item">
+                        <span class="stat-value" id="weekDays">0</span>
+                        <span class="stat-label">出勤日数</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value" id="weekHours">0</span>
+                        <span class="stat-label">勤務時間</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h2>新しいシフトを追加</h2>
+                <form id="shiftForm">
+                    <div class="form-group">
+                        <label for="date">日付</label>
+                        <input type="date" id="date" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="startTime">開始時間</label>
+                        <input type="time" id="startTime" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="endTime">終了時間</label>
+                        <input type="time" id="endTime" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="workplace">職場名</label>
+                        <input type="text" id="workplace" placeholder="例：コンビニA店" required>
+                    </div>
+                    
+                    <button type="submit" class="btn">シフトを追加</button>
+                </form>
+            </div>
+            
+            <div class="shifts-section">
+                <div class="shifts-header">
+                    <h2>シフト一覧</h2>
+                </div>
+                <div class="shifts-list" id="shiftsList">
+                    <div class="no-shifts">まだシフトが登録されていません</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class ShiftManager {
+            constructor() {
+                this.shifts = JSON.parse(localStorage.getItem('shifts')) || [];
+                this.init();
+            }
+
+            init() {
+                this.renderShifts();
+                this.updateWeeklySummary();
+                document.getElementById('shiftForm').addEventListener('submit', (e) => this.addShift(e));
+                
+                // 今日の日付をデフォルトにセット
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('date').value = today;
+            }
+
+            addShift(e) {
+                e.preventDefault();
+                
+                const date = document.getElementById('date').value;
+                const startTime = document.getElementById('startTime').value;
+                const endTime = document.getElementById('endTime').value;
+                const workplace = document.getElementById('workplace').value;
+
+                // 時間の妥当性チェック
+                if (startTime >= endTime) {
+                    alert('終了時間は開始時間より後にしてください');
+                    return;
+                }
+
+                const shift = {
+                    id: Date.now(),
+                    date,
+                    startTime,
+                    endTime,
+                    workplace,
+                    hours: this.calculateHours(startTime, endTime)
+                };
+
+                this.shifts.push(shift);
+                this.saveShifts();
+                this.renderShifts();
+                this.updateWeeklySummary();
+                
+                // フォームをリセット
+                document.getElementById('shiftForm').reset();
+                document.getElementById('date').value = new Date().toISOString().split('T')[0];
+                
+                // 成功メッセージ
+                this.showMessage('シフトが追加されました！', 'success');
+            }
+
+            calculateHours(startTime, endTime) {
+                const start = new Date(`2000-01-01 ${startTime}`);
+                const end = new Date(`2000-01-01 ${endTime}`);
+                const diff = (end - start) / (1000 * 60 * 60);
+                return Math.round(diff * 10) / 10; // 小数点第1位まで
+            }
+
+            deleteShift(id) {
+                if (confirm('このシフトを削除しますか？')) {
+                    this.shifts = this.shifts.filter(shift => shift.id !== id);
+                    this.saveShifts();
+                    this.renderShifts();
+                    this.updateWeeklySummary();
+                    this.showMessage('シフトが削除されました', 'success');
+                }
+            }
+
+            renderShifts() {
+                const shiftsList = document.getElementById('shiftsList');
+                
+                if (this.shifts.length === 0) {
+                    shiftsList.innerHTML = '<div class="no-shifts">まだシフトが登録されていません</div>';
+                    return;
+                }
+
+                // 日付順にソート
+                const sortedShifts = [...this.shifts].sort((a, b) => new Date(a.date) - new Date(b.date));
+
+                shiftsList.innerHTML = sortedShifts.map(shift => {
+                    const date = new Date(shift.date);
+                    const weekdays = ['日', '月', '火', '水', '木', '金', '土'];
+                    const dayOfWeek = weekdays[date.getDay()];
+                    const formattedDate = `${date.getMonth() + 1}/${date.getDate()}(${dayOfWeek})`;
+
+                    return `
+                        <div class="shift-item">
+                            <div class="shift-info">
+                                <div class="shift-date">${formattedDate}</div>
+                                <div class="shift-details">
+                                    ${shift.startTime} - ${shift.endTime} (${shift.hours}時間) | ${shift.workplace}
+                                </div>
+                            </div>
+                            <button class="btn btn-delete" onclick="shiftManager.deleteShift(${shift.id})">
+                                削除
+                            </button>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            updateWeeklySummary() {
+                const today = new Date();
+                const startOfWeek = new Date(today);
+                startOfWeek.setDate(today.getDate() - today.getDay());
+                const endOfWeek = new Date(startOfWeek);
+                endOfWeek.setDate(startOfWeek.getDate() + 6);
+
+                const weekShifts = this.shifts.filter(shift => {
+                    const shiftDate = new Date(shift.date);
+                    return shiftDate >= startOfWeek && shiftDate <= endOfWeek;
+                });
+
+                const weekDays = weekShifts.length;
+                const weekHours = weekShifts.reduce((total, shift) => total + shift.hours, 0);
+
+                document.getElementById('weekDays').textContent = weekDays;
+                document.getElementById('weekHours').textContent = Math.round(weekHours * 10) / 10;
+            }
+
+            saveShifts() {
+                localStorage.setItem('shifts', JSON.stringify(this.shifts));
+            }
+
+            showMessage(message, type) {
+                // 簡単な通知機能
+                const notification = document.createElement('div');
+                notification.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: ${type === 'success' ? '#4caf50' : '#f44336'};
+                    color: white;
+                    padding: 15px 20px;
+                    border-radius: 10px;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                    z-index: 1000;
+                    font-weight: 600;
+                `;
+                notification.textContent = message;
+                document.body.appendChild(notification);
+                
+                setTimeout(() => {
+                    notification.remove();
+                }, 3000);
+            }
+        }
+
+        // アプリケーション開始
+        const shiftManager = new ShiftManager();
+    </script>
+</body>
+</html>
